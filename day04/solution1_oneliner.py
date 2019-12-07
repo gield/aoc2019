@@ -1,0 +1,1 @@
+print(sum(list(s) == sorted(s) and len(set(s)) != len(s) for s in map(str, range(136760, 595731))))
