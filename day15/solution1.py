@@ -58,12 +58,10 @@ while 2 not in discovered.values():
         new_y = y + y_diff
         if (new_x, new_y) in discovered:
             continue
-        solver = Solver(int_code_program.copy(), [])
+        solver = Solver(int_code_program.copy())
         for d in path:
-            solver.input_values = iter([d])
-            result = solver.solve()
-        solver.input_values = iter([direction])
-        result = solver.solve()
+            result = solver.solve(d)
+        result = solver.solve(direction)
         discovered[new_x, new_y] = result
         if result == 2:
             oxygen_location = new_x, new_y

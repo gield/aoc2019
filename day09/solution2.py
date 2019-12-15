@@ -1,6 +1,6 @@
 import itertools
 from enum import IntEnum
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 
 class ParameterMode(IntEnum):
@@ -11,10 +11,10 @@ class ParameterMode(IntEnum):
 
 class Solver:
 
-    def __init__(self, memory: List[int], input_values: List[int]) -> None:
+    def __init__(self, memory: List[int]) -> None:
         self.memory = memory
-        self.input_values = iter(input_values)
-        self.output = []
+        self.input_value = None
+        self.output = None
         self.pointer = 0
         self.relative_base = 0
         self.is_finished = False
@@ -33,8 +33,11 @@ class Solver:
             99: (self.finish, 0, False),
         }
 
-    def solve(self) -> int:
-        while not self.is_finished:
+    def solve(self, input_value: Optional[int] = None) -> int:
+        self.output = None
+        if input_value is not None:
+            self.input_value = input_value
+        while not self.is_finished and self.output is None:
             self.step()
         return self.output
 
@@ -92,10 +95,11 @@ class Solver:
 
     def take_input(self, loc: int) -> None:  # 3
         self.increase_memory_size(loc)
-        self.memory[loc] = next(self.input_values)
+        self.memory[loc] = self.input_value
+        self.input_value = None
 
     def print_output(self, p1: int) -> None:  # 4
-        self.output.append(p1)
+        self.output = p1
 
     def jump_if_true(self, p1: int, p2: int) -> None:  # 5
         if bool(p1):
@@ -123,6 +127,6 @@ class Solver:
 with open("input.txt") as input_file:
     memory = list(map(int, input_file.readline().split(",")))
 
-solver = Solver(memory, input_values=[2])
-output = solver.solve()
-print(output[0])
+solver = Solver(memory)
+output = solver.solve(2)
+print(output)

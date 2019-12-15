@@ -7,10 +7,11 @@ with open("input.txt") as f:
 int_code_program[0] = 2
 
 screen = defaultdict(int)
-solver = Solver(int_code_program, [])
+solver = Solver(int_code_program)
 x_paddle, x_ball = 0, 0
+next_input = None
 while not solver.is_finished:
-    x = solver.solve()
+    x = solver.solve(next_input)
     y = solver.solve()
     tile_id = solver.solve()
     if x == -1 and y == 0:
@@ -21,10 +22,10 @@ while not solver.is_finished:
     x_paddle = x if tile_id == 3 else x_paddle
     x_ball = x if tile_id == 4 else x_ball
     if x_ball > x_paddle:
-        solver.input_values = iter([1])
+        next_input = 1
     elif x_ball < x_paddle:
-        solver.input_values = iter([-1])
+        next_input = -1
     else:
-        solver.input_values = iter([0])
+        next_input = 0
 
 print(score)

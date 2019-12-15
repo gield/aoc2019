@@ -9,21 +9,16 @@ class Robot:
         self.hull = hull
         self.x, self.y = 0, 0
         self.direction = 0
-        self.solver = Solver(int_code_program, [self.hull[self.x, self.y]])
+        self.solver = Solver(int_code_program)
         self.seen = set()
 
     def paint(self) -> None:
-        self.solver.solve()
         while not self.solver.is_finished:
-            color = self.solver.output[-1]
-            self.solver.solve()
-            turn = self.solver.output[-1]
+            color = self.solver.solve(self.hull[self.x, self.y])
+            turn = self.solver.solve()
             self.hull[self.x, self.y] = color
             self.seen.add((self.x, self.y))
             self.move(-1 if turn == 0 else 1)
-
-            self.solver.input_values = iter([self.hull[self.x, self.y]])
-            self.solver.solve()
 
     def move(self, turn: int) -> None:
         self.direction = (self.direction + turn) % 4
