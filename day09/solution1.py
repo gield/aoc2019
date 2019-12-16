@@ -1,4 +1,5 @@
 import itertools
+from collections import defaultdict
 from enum import IntEnum
 from typing import Any, List, Optional, Tuple
 
@@ -12,7 +13,7 @@ class ParameterMode(IntEnum):
 class Solver:
 
     def __init__(self, memory: List[int]) -> None:
-        self.memory = memory
+        self.memory = defaultdict(int, {i: v for i, v in enumerate(memory)})
         self.input_value = None
         self.output = None
         self.pointer = 0
@@ -49,7 +50,8 @@ class Solver:
         instruction = self.memory[self.pointer]
         raw_param_modes, opcode = divmod(instruction, 100)
         operation, n_params, last_param_is_loc = self.OPERATIONS[opcode]
-        params = self.memory[self.pointer + 1:self.pointer + n_params + 1]
+        params = [self.memory[i] for i in range(self.pointer + 1,
+                                                self.pointer + n_params + 1)]
         param_modes = self.get_parameter_modes(raw_param_modes, n_params)
         params = self.convert_params(params, param_modes, last_param_is_loc)
         self.pointer += n_params + 1
@@ -75,26 +77,17 @@ class Solver:
                 loc = params[i]
                 if param_modes[i] == ParameterMode.RELATIVE_MODE:
                     loc += self.relative_base
-                self.increase_memory_size(loc)
                 params[i] = self.memory[loc]
         return params
 
-    def increase_memory_size(self, last_loc):
-        if last_loc >= len(self.memory):
-            extension = [0] * (last_loc + 1 - len(self.memory))
-            self.memory.extend(extension)
-
     # OPERATIONS
     def add(self, p1: int, p2: int, loc: int) -> None:  # 1
-        self.increase_memory_size(loc)
         self.memory[loc] = p1 + p2
 
     def multiply(self, p1: int, p2: int, loc: int) -> None:  # 2
-        self.increase_memory_size(loc)
         self.memory[loc] = p1 * p2
 
     def take_input(self, loc: int) -> None:  # 3
-        self.increase_memory_size(loc)
         self.memory[loc] = self.input_value
         self.input_value = None
 
@@ -110,11 +103,9 @@ class Solver:
             self.pointer = p2
 
     def less_than(self, p1: int, p2: int, loc: int) -> None:  # 7
-        self.increase_memory_size(loc)
         self.memory[loc] = 1 if p1 < p2 else 0
 
     def equals(self, p1: int, p2: int, loc: int) -> None:  # 8
-        self.increase_memory_size(loc)
         self.memory[loc] = 1 if p1 == p2 else 0
 
     def adjust_relative_base(self, p1: int) -> None:  # 9
